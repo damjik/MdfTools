@@ -66,11 +66,14 @@ namespace MdfTools.V4
                 }
             }
 
-            if (ChannelGroup.File.ConversionCache.TryGetValue(c, out var specs))
+            lock(ChannelGroup.File.ConversionCache)
             {
-                val = specs.Item1;
-                disp = specs.Item2;
-                return;
+                if (ChannelGroup.File.ConversionCache.TryGetValue(c, out var specs))
+                {
+                    val = specs.Item1;
+                    disp = specs.Item2;
+                    return;
+                }
             }
 
             void MappingHelper(int numBlocks, ref ValueConversionSpec val, ref DisplayConversionSpec disp)
@@ -166,6 +169,11 @@ namespace MdfTools.V4
                 throw new ArgumentOutOfRangeException();
             }
 
+            lock(ChannelGroup.File.ConversionCache)
+            {
+                ChannelGroup.File.ConversionCache[c] = (val, disp);
+            }
+            
             ChannelGroup.File.ConversionCache[c] = (val, disp);
         }
 
