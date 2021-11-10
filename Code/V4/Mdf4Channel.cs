@@ -53,9 +53,9 @@ namespace MdfTools.V4
             if (c == null)
                 return;
 
-            var p = c.Params;
+            // var p = c.Params;
 
-            if (c.Data.RefCount > 0 && p.Length != c.Data.RefCount)
+            if (c.Data.RefCount > 0 && c.Params.Length != c.Data.RefCount)
             {
                 //Hacky: we assume all parameters are present before the next linked CC Block.
                 //Hacky: we only parse the last CC Block.
@@ -92,7 +92,7 @@ namespace MdfTools.V4
                 {
                     if (blks[i] is Mdf4TXBlock str)
                     {
-                        lookup[p[i]] = str;
+                        lookup[c.Params[i]] = str;
                     }
                 }
 
@@ -108,25 +108,25 @@ namespace MdfTools.V4
                 if (c.Params[0] == 0 && c.Params[1] == 1)
                     val = ValueConversionSpec.Default;
                 else
-                    val = new ValueConversionSpec.Linear(p[0], p[1]);
+                    val = new ValueConversionSpec.Linear(c.Params[0], c.Params[1]);
                 break;
             case Mdf4CCBlock.ConversionType.Rational:
-                if (p[0] == 0 && p[3] == 0 && p[4] == 0 && p[5] == 1)
+                if (c.Params[0] == 0 && c.Params[3] == 0 && c.Params[4] == 0 && c.Params[5] == 1)
                 {
-                    if (p[2] == 0 && p[1] == 1)
+                    if (c.Params[2] == 0 && c.Params[1] == 1)
                         val = ValueConversionSpec.Default;
                     else
-                        val = new ValueConversionSpec.Linear(p[2], p[1]);
+                        val = new ValueConversionSpec.Linear(c.Params[2], c.Params[1]);
                 }
                 else
-                    val = new ValueConversionSpec.Rational3(p[2], p[1], p[0], p[5], p[4], p[3]);
+                    val = new ValueConversionSpec.Rational3(c.Params[2], c.Params[1], c.Params[0], c.Params[5], c.Params[4], c.Params[3]);
 
                 break;
             case Mdf4CCBlock.ConversionType.AlgebraicText:
                 Check.NotImplemented(new NotImplementedException());
                 break;
             case Mdf4CCBlock.ConversionType.ValToValInterp:
-                if (p.Length == 4 && p[0] == p[1] && p[2] == p[3])
+                if (c.Params.Length == 4 && c.Params[0] == c.Params[1] && c.Params[2] == c.Params[3])
                     val = ValueConversionSpec.Default;
                 else
                     Check.NotImplemented(new NotImplementedException());
@@ -139,21 +139,21 @@ namespace MdfTools.V4
                 break;
             case Mdf4CCBlock.ConversionType.ValToTextScaleTab:
             {
-                MappingHelper(p.Length, ref val, ref disp);
+                MappingHelper(c.Params.Length, ref val, ref disp);
                 break;
             }
             case Mdf4CCBlock.ConversionType.ValRangeToTextScaleTab:
             {
                 var noRange = true;
-                for (var i = 0; i < p.Length; i += 2)
-                    noRange &= p[i] == p[i + 1];
+                for (var i = 0; i < c.Params.Length; i += 2)
+                    noRange &= c.Params[i] == c.Params[i + 1];
 
                 if (!noRange)
                 {
                     Check.NotImplemented();
                 }
 
-                MappingHelper(p.Length / 2 + 1, ref val, ref disp);
+                MappingHelper(c.Params.Length / 2 + 1, ref val, ref disp);
                 break;
             }
             case Mdf4CCBlock.ConversionType.TextToVal:
