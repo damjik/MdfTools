@@ -83,14 +83,13 @@ A MDF 4.x Reader (for now)
       using var mf4 = Mdf4File.Open("cool_measurements.mf4");
       var example = mf4
                     .Channels
-                    .FirstOrDefault(k => k.Name.ToLower().Contains("rpm_channel"));
+                    .Where(k => k.Name.ToLower().Contains("rpm_channel"));
 
+      var samples = Mdf4Sampler.CreateMany(example);
 
-      var samples = Mdf4Sampler.LoadFull(example, example.Master);
-
-      var data = samples[0].GetSpan<double>();
-      var time = samples[1].GetSpan<double>();
-
+      var data = samples[0].Buffers[0].GetSpan<double>();
+      var time = samples[0].Buffers[1].GetSpan<double>();
+      
       // use the samples for something.
   }
 
